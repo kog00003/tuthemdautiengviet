@@ -44,7 +44,7 @@ def bodau_str_replace(a):
     return a
 
 
-# str replace vs str translate, sometime faster, sometime slower
+# str replace vs str translate, sometime faster, sometime slower, :)
 bodau = bodau_str_translate
 
 
