@@ -1,5 +1,5 @@
 from re import sub
-
+# import tokenizer
 new_values = list("aAeEoOuUiIdDyY")
 old_values = ["áàạảãâấầậẩẫăắằặẳẵ",
               "ÁÀẠẢÃÂẤẦẬẨẪĂẮẰẶẲẴ",
@@ -44,8 +44,10 @@ def bodau_str_replace(a):
     return a
 
 
-# str replace vs str translate, sometime faster, sometime slower, :)
-bodau = bodau_str_translate
+# str replace vs str translate, sometime faster, sometime slower
+
+# bodau_str_translate with none check
+def bodau(x): return bodau_str_translate(x) if x else x
 
 
 # test_text = 'Giải bóng đá Ngoại hạng Anh là hạng đấu cao nhất của hệ thống các giải bóng đá ở Anh. Gồm 20 câu lạc bộ, giải đấu sử dụng hệ thống thăng hạng và xuống hạng với English Football League (EFL). Mùa giải kéo dài từ tháng 8 đến tháng 5 với mỗi đội chơi 38 trận đấu (đấu với 19 đội khác trên sân nhà và sân khách). Đa số các trận đấu được diễn ra vào chiều Thứ Bảy và Chủ Nhật.'
