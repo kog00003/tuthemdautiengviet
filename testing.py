@@ -6,14 +6,23 @@ import torch
 import torch.nn as nn
 from simpletorch import toTensorF, toTensorL
 import numpy as np
-model = torch.nn.Sequential(nn.Linear(45, 256),
+model = torch.nn.Sequential(nn.Linear(45, 128),
                             nn.ReLU(),
-                            nn.Linear(256, 256),
+                            nn.Linear(128, 128),
                             nn.ReLU(),
-                            nn.Linear(256, 256),
+                            nn.Linear(128, 128),
                             nn.ReLU(),
-                            nn.Linear(256, 11))
-model = simpletorch.loadModel(model, 'model_256')
+                            nn.Linear(128, 128),
+                            nn.ReLU(),
+                            nn.Linear(128, 128),
+                            nn.ReLU(),
+                            nn.Linear(128, 128),
+                            nn.ReLU(),
+                            nn.Linear(128, 128),
+                            nn.ReLU(),
+                            nn.Linear(128, 11))
+
+model = simpletorch.loadModel(model, 'model')
 print('n_params', sum(p.numel() for p in model.parameters()))
 
 
@@ -40,5 +49,8 @@ def them_dau_with_model(model, s):
 # label = torch.load('y')
 # simpletorch.testingWithCrossEntropyLossMultiTarget(
 #     model, data, label, [[0, 2], [2, 5], [5, 11]])
-s = 'ngay 9 thang 12 nam 2022 dat ket qua chinh xac 87% voi 146187 params'
+
+s = 'ngay 9 thang 12 nam 2022 dat toi ket qua chinh xac 87% voi 106379 params'
 them_dau_with_model(model, s)
+
+

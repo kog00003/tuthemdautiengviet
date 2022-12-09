@@ -38,6 +38,9 @@ def encode_word_no_accent(s):
     fin = na_fin[fin.lower()] if fin else 15
     return con, vow, fin
 
+encode_word_no_accent('toi')
+encode_word_no_accent('la')
+encode_word_no_accent('ai')
 # bin(31)
 # split_to_con_vow_fin('iet')
 # encode_word_no_accent('iet')
