@@ -52,20 +52,24 @@ def simpleModel(inFeatures=50, outFeatures=13, hidden=0, tanhOut=False, sigmoidO
                 nn.Linear(hidden, outFeatures))
 
 
-def loadModel(model, name, onGPU=False):
-    if not onGPU:
-        model.load_state_dict(torch.load(
-            f'D:/Data/Notebook/gamble/torch_model/{name}', map_location=torch.device('cpu')))
-    else:
-        model.load_state_dict(torch.load(
-            f'D:/Data/Notebook/gamble/torch_model/{name}', map_location=torch.device('cuda')))
+def loadModel(model, filePath, onGPU=False):
+    model.load_state_dict(torch.load(
+        filePath, map_location=torch.device('cuda' if onGPU else 'cpu')))
     model.eval()
     return model
 
 
-def saveModel(model, name):
+def saveModel(model, filePath):
+    torch.save(model.state_dict(), filePath)
+
+
+def loadModelV(model, filePath, onGPU=False):
+    return loadModel(model, f'D:/Data/Notebook/gamble/torch_model/{filePath}', onGPU)
+
+
+def saveModelV(model, filePath):
     torch.save(model.state_dict(),
-               f'D:/Data/Notebook/gamble/torch_model/{name}')
+               f'D:/Data/Notebook/gamble/torch_model/{filePath}')
 
 
 def predict(model, tensorData, threshold=0, defaultValue=None):
@@ -85,9 +89,9 @@ def predictWithScore(model, tensorData):
                         a[0].detach().tolist()))
 
 
-def predictMultiObj(model, tensorData, indices, probability=False):
+def predictMulitTarget(model, tensorData, multi_positions, probability=False):
     """
-    indices=[
+    multi_positions=[
         [ob1IndexFrom,ob1IndexEnd],...
     ]
     ex:[[0,6],[6,13]]
@@ -96,12 +100,12 @@ def predictMultiObj(model, tensorData, indices, probability=False):
         result = model(tensorData)
         # n = len(indices)
         results = []
-        for iStart, iEnd in indices:
+        for iStart, iEnd in multi_positions:
             results.append(nn.Softmax(dim=1)(result[:, iStart:iEnd]))
         data = []
         for i in range(len(result)):
             x = []
-            for j in range(len(indices)):
+            for j in range(len(multi_positions)):
                 y = results[j][i]
                 if probability:
                     x.append((y.argmax().item(), y.max().item()))
@@ -111,8 +115,8 @@ def predictMultiObj(model, tensorData, indices, probability=False):
         return data
 
 
-def predictMultiObjWProb(model, tensorData, indices):
-    return predictMultiObj(model, tensorData, indices, True)
+# def predictMultiObjWProb(model, tensorData, indices):
+#     return predictMulitTarget(model, tensorData, indices, True)
 
 
 class VDataSet(Dataset):
@@ -249,6 +253,27 @@ def testingWithCrossEntropyLoss(model, xTest, yTest):
         a = nn.functional.softmax(out, dim=1).max(dim=1)
         probRight = mean(a[1] == yTest)
         meanScore = mean(a[0])
+        return dict(loss=loss.item(), probTrue=probRight.item(), avgScore=meanScore.item())
+
+
+def testingWithCrossEntropyLossMultiTarget(model, xTest, yTest, multi_positions):
+    """
+    return {'loss': 0.025, 'probTrue': 1.0, 'avgScore': 0.97}"""
+    with torch.no_grad():
+        # xTest, yTest = xtt, ytt
+        # multi_positions = [[0, 2], [2, 5], [5, 11]]
+        out = model(xTest)
+        loss = crossEntropyLossMultiTarget(
+            multi_positions=multi_positions)(out, yTest)
+        b = []
+        c = []
+        for k, v in enumerate(multi_positions):
+            i, j = v
+            a = nn.functional.softmax(out[:, i:j], dim=1).max(dim=1)
+            b.append(a[1] == yTest[:, k])
+            c.append(a[0])
+        probRight = mean(torch.vstack(b).sum(0) == 3)
+        meanScore = mean(torch.prod(torch.vstack(c), 0))
         return dict(loss=loss.item(), probTrue=probRight.item(), avgScore=meanScore.item())
 
 # x, y: your data/label
