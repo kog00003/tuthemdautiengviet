@@ -33,6 +33,6 @@ Predict phụ âm (d/đ), nguyên âm (a,ă,â), dấu riêng rẽ: dùng score-
 
 <h3>model:</h3>
 
-simple chỉ linear+relu: đạt 90% accurate với 100K Params, training 15 phút trên colab.
+simple chỉ linear+relu: đạt 90% accurate với 100K Params, training ~ 3M samples trong 15 phút trên colab.
 
 rnn,lstm,tranformer next...
