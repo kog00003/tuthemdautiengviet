@@ -1,5 +1,7 @@
 from re import sub
 # import tokenizer
+
+
 new_values = list("aAeEoOuUiIdDyY")
 old_values = ["áàạảãâấầậẩẫăắằặẳẵ",
               "ÁÀẠẢÃÂẤẦẬẨẪĂẮẰẶẲẴ",
@@ -15,6 +17,7 @@ old_values = ["áàạảãâấầậẩẫăắằặẳẵ",
               "Đ",
               "ýỳỵỷỹ",
               "ÝỲỴỶỸ"]
+
 
 zip_values = [(k, new_values[i])
               for i, j in enumerate(old_values) for k in j]
@@ -64,3 +67,40 @@ def bodau(x): return bodau_str_translate(x) if x else x
 # 100%|██████████| 100000/100000 [00:07<00:00, 13675.33it/s]
 # for _ in tqdm.trange(100000):
 #     s = bodau_re_sub(test_text)
+
+
+new_values_only_tone = 'a â ă A Â Ă e ê E Ê o ô ơ O Ô Ơ u ư U Ư i I y Y'.split()
+old_values_only_tone = ["áàạảã",
+                        "ấầậẩẫ",
+                        "ắằặẳẵ",
+                        "ÁÀẠẢÃ",
+                        "ẤẦẬẨẪ",
+                        "ẮẰẶẲẴ",
+                        "éèẹẻẽ",
+                        "ếềệểễ",
+                        "ÉÈẸẺẼ",
+                        "ẾỀỆỂỄ",
+                        "óòọỏõ",
+                        "ốồộổỗ",
+                        "ớờợởỡ",
+                        "ÓÒỌỎÕ",
+                        "ỐỒỘỔỖ",
+                        "ỚỜỢỞỠ",
+                        "úùụủũ",
+                        "ứừựửữ",
+                        "ÚÙỤỦŨ",
+                        "ỨỪỰỬỮ",
+                        "íìịỉĩ",
+                        "ÍÌỊỈĨ",
+                        "ýỳỵỷỹ",
+                        "ÝỲỴỶỸ"]
+
+zip_values_only_tone = [(k, new_values_only_tone[i])
+                        for i, j in enumerate(old_values_only_tone) for k in j]
+
+
+def bodau_only_tone(a):
+    """use str.replace"""
+    for i, j in zip_values_only_tone:
+        a = a.replace(i, j)
+    return a
