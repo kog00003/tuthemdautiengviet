@@ -2,7 +2,7 @@
 
 <h1>building model tự thêm dấu cho tiếng việt</h1>
 
-on processing...
+on progressing...
 
 không dùng vocal/dictionary encode như thông thường nlp
 
@@ -33,6 +33,6 @@ Predict phụ âm (d/đ), nguyên âm (a,ă,â), dấu riêng rẽ: dùng score-
 
 <h3>model:</h3>
 
-simple chỉ linear+relu: đạt 90% accurate với 100K Params, training ~ 3M samples trong 15 phút trên colab.
+simple chỉ (linear+relu+normalize)x5 : đạt 90% accurate với 100K Params, training ~ 3M samples trong 15 phút trên colab.
 
-rnn,lstm,tranformer next...
+next: more samples/params, rnn,lstm,tranformer...
