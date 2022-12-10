@@ -135,34 +135,47 @@ def getDataLoader(x, y, batchSize=1024, shuffle=True):
     return DataLoader(VDataSet(x, y), batch_size=batchSize, shuffle=shuffle)
 
 
-def training(model, trainingData, trainingLabel, lossUse=nn.CrossEntropyLoss(), batchSize=1024, shuffle=True, learningRate=.1, numSteps=10, numStepsPerBatch=10, showBatchProcess=False, returnFullLoss=False):
+def training(model, trainingData, trainingLabel, lossUse=nn.CrossEntropyLoss(), batchSize=1024, shuffle=True, learningRate=.1, numSteps=10, numStepsPerBatch=10, returnFullLoss=False):
     """
+    Args:
     kw is what it'mean.
-    showBatchProcess: True: show tqdm process for each batch run. False: only one overrall
-    returnFullLoss: True return [[all loss on step 1][step 2]...
-    default False: [mean_loss(step1),....]
+    learningRate: suport multi lr list-or-tupe, but require numSteps same for each  ex learningRate=(.1,.01,.001), numSteps(100,200,300)
+
+
+    Return:
+
+    if returnFullLoss is True:
+    [[all loss on step 1][step 2]
+    else False (default):
+    [mean(step1),...]
     """
     dataLoader = getDataLoader(
         trainingData, trainingLabel, batchSize=batchSize, shuffle=shuffle)
-    optim = torch.optim.SGD(model.parameters(), lr=learningRate)
     losses = []
-    iter0 = np.arange(numSteps)
-    if not showBatchProcess:
-        iter0 = tqdm.tqdm(iter0)
-    for i in iter0:
-        iter1 = iter(dataLoader)
-        if showBatchProcess:
-            iter1 = tqdm.tqdm(iter1, desc=f'{i+1}/{numSteps}')
-        losses1 = []
-        for x, y in iter1:
-            for _ in range(numStepsPerBatch):
-                optim.zero_grad()
-                out = model(x)
-                loss = lossUse(out, y)
-                loss.backward()
-                optim.step()
-                losses1.append(loss.item())
-        losses.append(losses1)
+    if not isinstance(numSteps, list) and not isinstance(numSteps, tuple):
+        numSteps = (numSteps,)
+    if not isinstance(learningRate, list) and not isinstance(learningRate, tuple):
+        learningRate = (learningRate,)
+
+    for numStep, lr in zip(numSteps, learningRate):
+        optim = torch.optim.SGD(model.parameters(), lr=lr)
+        iter0 = tqdm.trange(numStep)
+        for i in iter0:
+            iter1 = iter(dataLoader)
+            numBatch = len(iter1)
+            losses1 = []
+            j = 1
+            for x, y in iter1:
+                iter0.set_description_str(f'{j:03d}/{numBatch:03d} lr {lr}')
+                for _ in range(numStepsPerBatch):
+                    optim.zero_grad()
+                    out = model(x)
+                    loss = lossUse(out, y)
+                    loss.backward()
+                    optim.step()
+                    losses1.append(loss.item())
+                j += 1
+            losses.append(losses1)
     losses = np.array(losses)
     if not returnFullLoss:
         losses = [np.mean(l) for l in losses]
@@ -170,11 +183,11 @@ def training(model, trainingData, trainingLabel, lossUse=nn.CrossEntropyLoss(), 
 
 
 def trainingWithMSELoss(model, trainingData, trainingLabel, learningRate=.1, numSteps=10, batchSize=1024, shuffle=True, numStepsPerBatch=100, showBatchProcess=True, returnFullLoss=False):
-    return training(model, trainingData, trainingLabel, lossUse=nn.MSELoss(), learningRate=learningRate, numSteps=numSteps, batchSize=batchSize, shuffle=shuffle, numStepsPerBatch=numStepsPerBatch, showBatchProcess=showBatchProcess, returnFullLoss=returnFullLoss)
+    return training(model, trainingData, trainingLabel, lossUse=nn.MSELoss(), learningRate=learningRate, numSteps=numSteps, batchSize=batchSize, shuffle=shuffle, numStepsPerBatch=numStepsPerBatch,  returnFullLoss=returnFullLoss)
 
 
 def trainingWithCrossEntropyLoss(model, trainingData, trainingLabel, learningRate=.1, numSteps=10, batchSize=1024, shuffle=True, numStepsPerBatch=100, showBatchProcess=True, returnFullLoss=False):
-    return training(model, trainingData, trainingLabel, lossUse=nn.CrossEntropyLoss(), learningRate=learningRate, numSteps=numSteps, batchSize=batchSize, shuffle=shuffle, numStepsPerBatch=numStepsPerBatch, showBatchProcess=showBatchProcess, returnFullLoss=returnFullLoss)
+    return training(model, trainingData, trainingLabel, lossUse=nn.CrossEntropyLoss(), learningRate=learningRate, numSteps=numSteps, batchSize=batchSize, shuffle=shuffle, numStepsPerBatch=numStepsPerBatch,  returnFullLoss=returnFullLoss)
 
 
 def chooseTrainTest(x, y, trainPercent=.9):
@@ -231,12 +244,12 @@ def _crossEntropyLossMultiTarget(out, label, multi_positions):
 
 def crossEntropyLossMultiTarget(multi_positions):
     """
-    multi_possitions: 
+    multi_possitions:
     example
     ((0,2),(2,5),(5,9))
-    out[:,0:2] for target 1 label[:,0] 
-    out[:,2:5] for target 2 label[:,1] 
-    out[:,5:9] for target 3 label[:,2] 
+    out[:,0:2] for target 1 label[:,0]
+    out[:,2:5] for target 2 label[:,1]
+    out[:,5:9] for target 3 label[:,2]
     return loss_function
     """
     def lossUse(out, label): return _crossEntropyLossMultiTarget(
@@ -289,3 +302,11 @@ def testingWithCrossEntropyLossMultiTarget(model, xTest, yTest, multi_positions)
 #                                       numSteps=50,
 #                                       numStepsPerBatch=2,
 #                                       batchSize=1024)
+
+
+# training(model, xtn, ytn,
+#          batchSize=48,
+#          lossUse=lossUse,
+#          learningRate=[1, .1, .01, .001],
+#          numSteps=[20, 100, 200, 300],
+#          numStepsPerBatch=2)[-1]
