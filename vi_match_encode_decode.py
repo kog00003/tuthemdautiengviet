@@ -20,6 +20,8 @@ na_vowd = {i+1: j for i, j in enumerate(na_vow)}
 na_find = {i+1: j for i, j in enumerate(na_fin)}
 
 
+# split_to_con_vow_fin('gioi')
+
 def is_vietnamese_without_accent_word(s):
     return split_to_con_vow_fin(s) is not None
 
@@ -38,9 +40,9 @@ def encode_word_no_accent(s):
     fin = na_fin[fin.lower()] if fin else 15
     return con, vow, fin
 
-encode_word_no_accent('toi')
-encode_word_no_accent('la')
-encode_word_no_accent('ai')
+# encode_word_no_accent('toi')
+# encode_word_no_accent('la')
+# encode_word_no_accent('ai')
 # bin(31)
 # split_to_con_vow_fin('iet')
 # encode_word_no_accent('iet')
