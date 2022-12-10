@@ -4,7 +4,7 @@
 
 on progressing...
 
-không dùng vocal/dictionary encode như thông thường nlp
+<h2>không dùng RNN style network (RNN, LTSM...)</h2>
 
 <h3>data in:</h3>
 
@@ -33,8 +33,11 @@ Predict phụ âm (d/đ), nguyên âm (a,ă,â), dấu riêng rẽ: dùng score-
 
 <h3>model:</h3>
 
-simple chỉ (linear+relu+normalize)x5 : đạt 90% accurate với 100K Params, training ~ 3M samples trong 15 phút trên colab.
+simple chỉ (linear+relu)x5 : đạt 90% accurate với 100K Params, training ~ 3M samples trong 15 phút trên colab.
 
 next: more samples/params, ...
 
-rnn,lstm,tranformer not possible with this situation
+<h2> Dùng RNN </h2>
+
+working...
+
