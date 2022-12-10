@@ -81,12 +81,6 @@ def them_dau_with_model(model, s):
 #     model, data, label, [[0, 2], [2, 5], [5, 11]])
 
 
-# for _ in tqdm.trange(20000):
-#     s = 'tai sao anh lai noi vay, tai sao anh lai noi vay, tai sao anh lai noi vay, tai sao anh lai noi vay'
-#     s = them_dau_with_model(model, s)
-# print(s)
-
-
 class App(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
