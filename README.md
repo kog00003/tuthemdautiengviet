@@ -35,4 +35,5 @@ Predict phụ âm (d/đ), nguyên âm (a,ă,â), dấu riêng rẽ: dùng score-
 
 simple chỉ (linear+relu+normalize)x5 : đạt 90% accurate với 100K Params, training ~ 3M samples trong 15 phút trên colab.
 
-next: more samples/params, rnn,lstm,tranformer...
+next: more samples/params, ...
+rnn,lstm,tranformer not possible with this situation
