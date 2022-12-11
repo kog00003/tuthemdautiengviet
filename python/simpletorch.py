@@ -311,42 +311,42 @@ def testingWithCrossEntropyLossMultiTarget(model, xTest, yTest, multi_positions)
 #          numSteps=[20, 100, 200, 300],
 #          numStepsPerBatch=2)[-1]
 
-def LinearReLU(inF, outF): return nn.Sequential(
+def LinearRelu(inF, outF): return nn.Sequential(
     nn.Linear(inF, outF),
     nn.ReLU())
 
 
-def LinearNormReLU(inF, outF): return nn.Sequential(
+def LinearNormRelu(inF, outF): return nn.Sequential(
     nn.Linear(inF, outF),
     nn.BatchNorm1d(outF),
     nn.ReLU())
 
 
-class LinearReLUStackX(nn.Module):
+class LinearReluResidual(nn.Module):
     """
     outF already count inF: = inF + hidF
     """
 
     def __init__(self, inF, outF):
         super().__init__()
-        self.lrn = LinearReLU(inF, outF-inF)
+        self.lrn = LinearRelu(inF, outF-inF)
 
     def forward(self, x):
         return torch.hstack((self.lrn(x), x))
 
 
-class LinearNormReLUStackX(nn.Module):
+class LinearNormReluResidual(nn.Module):
     """
     outF already count inF: = inF + hidF
     """
 
     def __init__(self, inF, outF):
         super().__init__()
-        self.lrn = LinearNormReLU(inF, outF-inF)
+        self.lrn = LinearNormRelu(inF, outF-inF)
 
     def forward(self, x):
         return torch.hstack((self.lrn(x), x))
 
 
 def get_num_params(model):
-    return get_num_params
+    return sum(p.numel() for p in model.parameters())
