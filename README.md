@@ -4,15 +4,13 @@
 
 on progressing...
 
-<h2>không dùng RNN style network (RNN, LTSM...)</h2>
-
 <h3>data in:</h3>
 
 không dùng cả câu chỉ dùng 3 chữ (chữ trước, chữ hiện tãi(cần thêm dấu), chữ tiếp theo)
 
 <h3>encode chữ: </h3>
 
-tách chữ thành: (phụ âm - nguyên âm - phụ âm cuối), đánh số cho từng giá trị.
+tách chữ thành: (phụ âm - nguyên âm - phụ âm cuối), đánh số (by position) cho từng giá trị.
 
 ?Tại sao: chữ có cùng nguyên/phụ âm có thể dấu cũng tương tự, không cần vocal file.
 
@@ -22,22 +20,27 @@ chuyển tất cả số sang binary (0,1,0...)
 
 <h3>label:</h3>
 
-Predict phụ âm (d/đ), nguyên âm (a,ă,â), dấu riêng rẽ: dùng score-softmax(CrossEntropy)
+Predict phụ âm (d/đ), nguyên âm (a,ă,â), dấu riêng rẽ: dùng score-softmax (CrossEntropy)
  
-2 out cho d/đ
+2 output cho d/đ
 
-3 out cho a,ă,â..
+3 output cho a,ă,â..
 
-6 out cho dấu
+6 output cho dấu
 
 
-<h3>model:</h3>
+<h3>training/model:</h3>
 
-simple chỉ (linear+relu)x5 : đạt 90% accurate với 100K Params, training ~ 3M samples trong 15 phút trên colab.
+condition: limit ~ 150K weights/params, with 6M samples, colab gpu
 
-next: more samples/params, ...
+test 1:
 
-<h2> Dùng RNN </h2>
+(linear128, norm, relu) x 8 ~ 30 minutes : ~91% accurates
 
-nope, already has some work on github, too many weights, costy, not worth for this problems.
+test 2:
+
+RNN residual (drop output, stack all hidden data with source data) - LinearNormRelu ... seem result pretty good.
+
+
+
 
