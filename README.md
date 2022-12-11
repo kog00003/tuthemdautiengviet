@@ -39,7 +39,7 @@ test 1:
 
 test 2:
 
-RNN residual (drop output, stack all hidden data with source data) - LinearNormRelu ... seem result pretty good.
+RNN residual (drop output, stack all hidden data with source data) - LinearNormRelu ... result seem pretty good.
 
 
 
