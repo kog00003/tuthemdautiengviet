@@ -39,5 +39,5 @@ next: more samples/params, ...
 
 <h2> Dùng RNN </h2>
 
-nope, already has some work on github, too many weights, costy, not work for this problems.
+nope, already has some work on github, too many weights, costy, not worth for this problems.
 
