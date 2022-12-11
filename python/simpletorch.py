@@ -346,3 +346,7 @@ class LinearNormReLUStackX(nn.Module):
 
     def forward(self, x):
         return torch.hstack((self.lrn(x), x))
+
+
+def get_num_params(model):
+    return get_num_params
