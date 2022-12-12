@@ -1,10 +1,8 @@
 working...
 
-convert python to javascript
+convert all python to javascript, don't use any library, pure js
 
 90% done
-
-don't use any library, pure js
 
 remaining: matrix, model...
 
