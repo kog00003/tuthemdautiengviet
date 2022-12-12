@@ -8,22 +8,64 @@ import simpletorch
 import torch
 from bo_dau import bodau
 import torch.nn as nn
-from simpletorch import LinearNormReLU, toTensorF, toTensorL
+from simpletorch import LinearNormRelu, toTensorF, toTensorL
 import numpy as np
-model = torch.nn.Sequential(LinearNormReLU(45, 128),
-                            LinearNormReLU(128, 128),
-                            LinearNormReLU(128, 128),
-                            LinearNormReLU(128, 128),
-                            LinearNormReLU(128, 128),
-                            LinearNormReLU(128, 128),
-                            LinearNormReLU(128, 128),
-                            LinearNormReLU(128, 128),
-                            LinearNormReLU(128, 128),
+
+
+model = torch.nn.Sequential(LinearNormRelu(45, 128),
+                            LinearNormRelu(128, 128),
+                            LinearNormRelu(128, 128),
+                            LinearNormRelu(128, 128),
+                            LinearNormRelu(128, 128),
+                            LinearNormRelu(128, 128),
+                            LinearNormRelu(128, 128),
+                            LinearNormRelu(128, 128),
+                            LinearNormRelu(128, 128),
                             nn.Linear(128, 11))
+
 
 model = simpletorch.loadModel(model, 'data/model')
 print('n_params', sum(p.numel() for p in model.parameters()))
 
+
+class RNNX(nn.Module):
+    """
+    RNN only output for nn.Sequential
+    output flatten, and stack with x
+    """
+
+    def __init__(self, hidden_size=32, num_layers=1):
+        super().__init__()
+        self.rnn = nn.RNN(15, hidden_size, num_layers=num_layers, nonlinearity='relu',
+                          batch_first=True)
+
+    def forward(self, x):
+        n = len(x)
+        return torch.hstack((self.rnn(x.reshape(n, 3, 15))[0].flatten(1), x))
+
+
+model_rnn = model = nn.Sequential(RNNX(hidden_size=128, num_layers=2),
+                      LinearNormRelu(429, 128),
+                      LinearNormRelu(128, 128),
+                      LinearNormRelu(128, 128),
+                      LinearNormRelu(128, 128),
+                      nn.Linear(128, 11))
+
+model_rnn = simpletorch.loadModel(model_rnn, 'data/model_rnn')
+# restore_with_model(model,'toi','la','ai')
+print('n_params', sum(p.numel() for p in model_rnn.parameters()))
+
+
+model_rnn_simple = nn.Sequential(RNNX(hidden_size=128, num_layers=1),
+                                 LinearNormRelu(429, 128),
+                                 nn.Linear(128, 11))
+
+model_rnn_simple = simpletorch.loadModel(
+    model_rnn_simple, 'data/model_rnn_simple')
+# restore_with_model(model_rnn_simple,'toi','la','ai')
+print('n_params', sum(p.numel() for p in model_rnn_simple.parameters()))
+
+models = (model, model_rnn, model_rnn_simple)
 end_segment_chars = ('.', ',', ':', '!')
 
 
@@ -68,12 +110,24 @@ def them_dau_with_model(model, s):
 #s = them_dau_with_model(model, s)
 # print(s)
 
+options = [
+    "Linear 150K",
+    "RNN 150K",
+    "RNN_Simple 75K"
+]
+
 
 class App(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
         self.pack()
 
+        self.clicked = tk.StringVar()
+        self.clicked.set(options[1])
+        self.model = models[1]
+        self.dropdown = tk.OptionMenu(
+            None, self.clicked, *options, command=self.option_change)
+        self.dropdown.pack()
         self.entrythingy = tk.Entry(width=40, font=32)
         self.entrythingy.pack()
 
@@ -89,16 +143,24 @@ class App(tk.Frame):
         self.entrythingy.bind('<KeyPress>',
                               self.print_contents)
 
+    def option_change(self, event):
+        # print('option change', options.index(event))
+        self.model = models[options.index(event)]
+        self.them_dau()
+
+    def them_dau(self):
+        s = them_dau_with_model(self.model, bodau(self.contents.get()))
+        self.contents.set(s)
+
     def print_contents(self, event):
         # print(event.char)
         if event.char == ' ' or event.char in end_segment_chars:
-            s = them_dau_with_model(model, bodau(self.contents.get()))
-            self.contents.set(s)
+            self.them_dau()
             # print(self.contents.get())
 
 
 root = tk.Tk()
-root.geometry('400x50')
+root.geometry('400x80')
 myapp = App(root)
-myapp.master.title("test them dau tv")
+myapp.master.title("github.com/kog00003/tuthemdautiengviet/")
 myapp.mainloop()
