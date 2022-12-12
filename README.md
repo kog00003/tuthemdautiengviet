@@ -39,7 +39,7 @@ test 1:
 
 test 2:
 
-RNN residual (drop output, stack all hidden data with source data) - LinearNormRelu
+RNN residual (drop output, stack all hidden data with x) - LinearNormRelu
 
 89% accurates with only 75K params
 
