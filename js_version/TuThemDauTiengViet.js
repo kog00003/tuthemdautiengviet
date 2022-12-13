@@ -573,23 +573,6 @@ function restore_tone_with_status(s, status) {
 
 
 
-
-
-function multiplyMatrices(m1, m2) {
-  var result = [];
-  for (var i = 0; i < m1.length; i++) {
-    result[i] = [];
-    for (var j = 0; j < m2[0].length; j++) {
-      var sum = 0;
-      for (var k = 0; k < m1[0].length; k++) {
-        sum += m1[i][k] * m2[k][j];
-      }
-      result[i][j] = sum;
-    }
-  }
-  return result;
-}
-
 // var m1 = [[1, 2], [3, 4]]
 // var m2 = [[5, 6], [7, 8]]
 
@@ -637,9 +620,6 @@ function array_split_by_position(arr, positions) {
 
 
 
-function predict(x) {
-  return [1, 0, 1]
-}
 
 function bodau(x) {
   return str_multi_replace(x, bodau_rep)
@@ -713,7 +693,217 @@ function them_dau_with_model(s) {
   // console.log(samples);
   return samples.map((i) => { return restore_with_model(i) }).join(' ')
 }
-
 // s = 'ddd adfad '.split(' ')
 // s = them_dau_with_model('hom nay la thu hai, mai la thu ba')
+// console.log(s);
+
+
+
+function addArray(x, y) {
+  return x.map((v, i) => v + y[i])
+}
+
+function minusArray(x, y) {
+  return x.map((v, i) => v - y[i])
+}
+
+function multiplyArray(x, y) {
+  return x.map((v, i) => v * y[i])
+}
+function divideArray(x, y) {
+  return x.map((v, i) => v / y[i])
+}
+
+// s = addArray([1, 2, 3], [4, 5, 6])
+// console.log(s);
+
+function sqrtArray(x) {
+  return x.map((v) => Math.sqrt(v))
+}
+// s = sqrtArray([1, 2, 3])
+// console.log(s);
+
+function addArrayWithNumber(arr_x, y) {
+  return arr_x.map((v) => v + y)
+}
+
+// s = addArrayWithNumber([1, 2, 3], 2)
+// console.log(s);
+
+function addMatix(x, y) {
+  return x.map((v, i) => addArray(v, y[i]))
+}
+
+
+function transpose(array) {
+  return array[0].map((_, colIndex) => array.map(row => row[colIndex]));
+}
+
+// console.log(transpose([[1, 2], [3, 4]]));
+// 1 3 2 4
+
+// function multiplyMatrices(m1, m2) {
+//   var result = [];
+//   for (var i = 0; i < m1.length; i++) {
+//     result[i] = [];
+//     for (var j = 0; j < m2[0].length; j++) {
+//       var sum = 0;
+//       for (var k = 0; k < m1[0].length; k++) {
+//         sum += m1[i][k] * m2[k][j];
+//       }
+//       result[i][j] = sum;
+//     }
+//   }
+//   return result;
+// }
+
+
+
+// s = addMatix([[1, 2, 3], [1, 2, 3]], [[1, 2, 3], [4, 5, 6]])
+// console.log(s);
+
+function nn_linear(x, weight, bias) {
+  // return torch.matmul(x, weight.T + bias)
+  x = multiplyMatrices(x, transpose(weight))
+  return matrixAddArray(x, bias)
+}
+
+function nn_relu(x) {
+  // x matrix
+  // x[x < 0] = 0
+  // return x
+  return x.map((v) => { return v.map((z) => z < 0 ? 0 : z) })
+}
+
+function matrixMinusArray(x, y) {
+  return x.map((v) => minusArray(v, y))
+}
+
+function matrixMultiplyArray(x, y) {
+  return x.map((v) => multiplyArray(v, y))
+}
+
+
+function matrixAddArray(x, y) {
+  return x.map((v) => addArray(v, y))
+}
+
+function matrixDivideArray(x, y) {
+  return x.map((v) => divideArray(v, y))
+}
+
+// s = nn_relu([1, -4, 3, 4, -1, 6])
+// console.log(s);
+
+function nn_norm(x, weight, bias, mean, variant) {
+  // return ((x-mean) / torch.sqrt(var + 1e-5)) * weight + bias
+  x = matrixMinusArray(x, mean)
+  // console.log(x.length);
+  x = matrixDivideArray(x, sqrtArray(addArrayWithNumber(variant, 0)))
+  x = matrixMultiplyArray(x, weight)
+  x = matrixAddArray(x, bias)
+  return x
+}
+
+
+function sumArray(x) {
+  return x.reduce((partialSum, a) => partialSum + a, 0)
+}
+// s = sumArray([1, 2, 3])
+// console.log(s);
+
+function getColumn(x, col_index) {
+  return x.map((v) => v[col_index])
+}
+
+// s = getColumn([[1, 2, 3], [1, 2, 3]], 1)
+// console.log(s);
+// function multiplyMatrices(m1, m2) {
+//   var result = [];
+//   for (var i = 0; i < m1.length; i++) {
+//     result[i] = [];
+//     for (var j = 0; j < m2[0].length; j++) {
+//       var sum = 0;
+//       for (var k = 0; k < m1[0].length; k++) {
+//         sum += m1[i][k] * m2[k][j];
+//       }
+//       result[i][j] = sum;
+//     }
+//   }
+//   return result;
+// }
+
+function multiplyMatrices(x, y) {
+  return x.map((v) => {
+    return transpose(y).map((z) => sumArray(multiplyArray(v, z)))
+  })
+}
+
+
+
+// var model = require("model.json");
+var model = null
+
+fetch('model.json')
+  .then((response) => response.json())
+  .then((json) => { console.log(json.length); model = json });
+
+
+// x = [[0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]]
+
+
+// console.log(model[0][0]);
+// for 
+// weight = model[0][1][0]
+// bias = model[0][1][1]
+
+// nweight = model[1][1][0]
+// nbias = model[1][1][1]
+// nmean = model[1][1][2]
+// nvar = model[1][1][3]
+
+// addArrayWithNumber(nvar, 1)
+// console.log(nmean);
+// console.log(weight.length);
+// console.log(bias.length);
+function applyLayer(x, layerData) {
+  i = layerData
+  // console.log(i[0]);
+  if (i[0] == 'linear') x = nn_linear(x, ...i[1])
+  else if (i[0] == 'norm') x = nn_norm(x, ...(i[1].slice(0, 4)))
+  else if (i[0] == 'relu') x = nn_relu(x)
+  return x
+}
+
+
+
+function argMax(array) {
+  return array.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
+}
+
+// console.log(model[1][1].slice(0, 4).length)
+
+// x = applyLayer(x, model[0])
+// x = applyLayer(x, model[1])
+// x = applyLayer(x, model[2])
+// x = nn_norm(x, ...(model[1][1].slice(0, 4)))
+// x = nn_norm(x, nweight, nbias, nmean, nvar)
+// console.log(x[0]);
+
+// y = array_split_by_position(x[0], [2, 5])
+// y = y.map((v) => argMax(v))
+// console.log(y);
+
+
+function predict(x) {
+  x = [x]
+  for (i of model) {
+    x = applyLayer(x, i)
+  }
+  y = array_split_by_position(x[0], [2, 5])
+  y = y.map((v) => argMax(v))
+  return y
+}
+
+// s = them_dau_with_model('vi sao anh khong den ben toi')
 // console.log(s);
