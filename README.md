@@ -4,6 +4,10 @@
 
 on progressing...
 
+demo
+
+https://htmlpreview.github.io/?https://github.com/kog00003/tuthemdautiengviet/blob/main/js_version/index.html
+
 <h3>data in:</h3>
 
 không dùng cả câu chỉ dùng 3 chữ (chữ trước, chữ hiện tãi(cần thêm dấu), chữ tiếp theo)
