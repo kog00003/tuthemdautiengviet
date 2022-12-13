@@ -1,0 +1,18 @@
+<head></head>
+<script src="TuThemDauTiengViet.js"></script>
+
+<body>
+  <script>
+    function onKeyPressListener(event) {
+      text = document.querySelector("#input").value
+      if ([' ', '. ', ', '].includes(event.key)) {
+        // console.log();
+        document.querySelector("#input").value = them_dau_with_model(bodau(text))
+      }
+      // console.log(event);
+    }
+  </script>
+
+  <input id="input" style="font-size: 24px;padding: 16px;width: 100%;" onkeypress="onKeyPressListener(event)"
+    placeholder="type something">
+</body>
