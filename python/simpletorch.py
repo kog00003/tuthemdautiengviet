@@ -1,3 +1,4 @@
+import json
 import torch
 import torch.nn as nn
 import tqdm
@@ -350,3 +351,41 @@ class LinearNormReluResidual(nn.Module):
 
 def get_num_params(model):
     return sum(p.numel() for p in model.parameters())
+
+
+def list_group_by(arr, by_col_index):
+    return [[k for k in arr if k[by_col_index] == j] for j in sorted(set((i[by_col_index] for i in arr)))]
+
+
+def saveModelAsJson(model, filePath):
+    def state_dict_to_v(state_dict, relu_after_norm=True, relu_after_linear=True):
+
+        infer_layer_dict = {'weight_bias': 'linear',
+                            'weight_bias_running_mean_running_var_num_batches_tracked': 'norm'}
+
+        def infer_layer(keys):
+            i = '_'.join([j for _, j in keys])
+            return infer_layer_dict[i]
+
+        v = [i.rsplit('.', maxsplit=1) for i in list(state_dict.keys())]
+        z = list_group_by(v, 0)
+        a = [[infer_layer(keys), [state_dict[k].detach().numpy().tolist()
+                                  for k in ['.'.join(i) for i in keys]]] for keys in z]
+        if relu_after_norm:
+            a = [[i, ['relu', []]] if i[0] == 'norm' else [i, ] for i in a]
+            a = [j for i in a for j in i]
+        elif relu_after_linear:
+            a = [[i, ['relu', []]] if i[0] == 'linear' else [i, ] for i in a]
+            a = [j for i in a for j in i]
+        if a[-1][0] == 'relu':
+            a = a[:len(a)-1]
+
+        return a
+
+    with open(filePath, 'w') as f:
+        # s = {k: v.detach().numpy().tolist()
+        #      for k, v in model.state_dict().items()}
+
+        s = state_dict_to_v(model.state_dict(),
+                            relu_after_norm=True, relu_after_linear=True)
+        json.dump(s, f)

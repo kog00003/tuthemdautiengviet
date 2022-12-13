@@ -1,3 +1,4 @@
+import json
 import tkinter as tk
 import more_itertools
 # import tqdm
@@ -10,7 +11,7 @@ from bo_dau import bodau
 import torch.nn as nn
 from simpletorch import LinearNormRelu, toTensorF, toTensorL
 import numpy as np
-
+import re
 
 model = torch.nn.Sequential(LinearNormRelu(45, 128),
                             LinearNormRelu(128, 128),
@@ -44,12 +45,12 @@ class RNNX(nn.Module):
         return torch.hstack((self.rnn(x.reshape(n, 3, 15))[0].flatten(1), x))
 
 
-model_rnn = model = nn.Sequential(RNNX(hidden_size=128, num_layers=2),
-                      LinearNormRelu(429, 128),
-                      LinearNormRelu(128, 128),
-                      LinearNormRelu(128, 128),
-                      LinearNormRelu(128, 128),
-                      nn.Linear(128, 11))
+model_rnn = nn.Sequential(RNNX(hidden_size=128, num_layers=2),
+                          LinearNormRelu(429, 128),
+                          LinearNormRelu(128, 128),
+                          LinearNormRelu(128, 128),
+                          LinearNormRelu(128, 128),
+                          nn.Linear(128, 11))
 
 model_rnn = simpletorch.loadModel(model_rnn, 'data/model_rnn')
 # restore_with_model(model,'toi','la','ai')
@@ -82,7 +83,11 @@ def restore_with_model(model, prevW, currW, nextW):
     return restore_tone_with_status(currW, status)
 
 
-def them_dau_with_model(model, s):
+skip_last_word = False
+
+
+def them_dau_with_model(model, s, onlyLast=False):
+    global skip_last_word
     ss = s.split()
     samples = []
     split_positions = [pos+1 for pos,
@@ -95,20 +100,38 @@ def them_dau_with_model(model, s):
         arr.insert(0, None)
         arr.append(None)
         samples.extend(list(more_itertools.sliding_window(arr, 3)))
-    # print(samples)
-    return ' '.join([restore_with_model(model, *i)
-                     for i in samples])
+    samples = [list(i) for i in samples]
 
-# restore_with_model(model,'','BaT','dau')
-# data = torch.load('x').type(torch.float)
-# label = torch.load('y').type(torch.long)
-# simpletorch.testingWithCrossEntropyLossMultiTarget(
-#     model, data, label, [[0, 2], [2, 5], [5, 11]])
+    if len(samples) == 0:
+        return s
 
+    if onlyLast:
 
-#s = 'hom nay la chu nhat'
-#s = them_dau_with_model(model, s)
-# print(s)
+        prefix = ' '.join([j for _, j, _ in samples[:len(samples)-2]])
+
+        # use only last two samples
+
+        samples = samples[-2:]
+
+        if len(samples) == 2:
+            if not skip_last_word:
+                # reset word near last
+                samples[0][1] = bodau(samples[0][1])
+
+        # if user already add accent to word, change value skip_last_word to true so next time dont reset / predict accent
+
+        skip_last_word = not is_vietnamese_without_accent_word(samples[-1][1])
+
+        ns = ' '.join([restore_with_model(model, *i)
+                       for i in samples])
+
+    else:
+        prefix = ''
+        ns = ' '.join([restore_with_model(model, *i)
+                       for i in samples])
+
+    return f'{prefix} {ns}' if prefix else ns
+
 
 options = [
     "Linear 150K",
@@ -146,10 +169,15 @@ class App(tk.Frame):
     def option_change(self, event):
         # print('option change', options.index(event))
         self.model = models[options.index(event)]
-        self.them_dau()
+        self.reset_and_them_dau()
+
+    def reset_and_them_dau(self):
+        self.contents.set(them_dau_with_model(
+            self.model, bodau(self.contents.get()), onlyLast=False))
 
     def them_dau(self):
-        s = them_dau_with_model(self.model, bodau(self.contents.get()))
+        s = them_dau_with_model(
+            self.model, self.contents.get(), onlyLast=True)
         self.contents.set(s)
 
     def print_contents(self, event):
@@ -164,3 +192,9 @@ root.geometry('400x80')
 myapp = App(root)
 myapp.master.title("github.com/kog00003/tuthemdautiengviet/")
 myapp.mainloop()
+
+
+
+
+# str([i for w in 'toi la ai'.split()
+#          for i in encode_word_no_accent_binary(w)])
