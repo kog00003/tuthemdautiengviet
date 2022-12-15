@@ -440,82 +440,16 @@ let restore_tones = [[['Â', 'Ầ'],
 ['u', 'ụ'],
 ['i', 'ị']]]
 
-let restore_vowels = [[['A', 'Â'],
-['A', 'Â'],
-['A', 'Â'],
-['A', 'Â'],
-['A', 'Â'],
-['A', 'Â'],
-['a', 'â'],
-['a', 'â'],
-['a', 'â'],
-['a', 'â'],
-['a', 'â'],
-['a', 'â'],
-['E', 'Ê'],
-['E', 'Ê'],
-['E', 'Ê'],
-['E', 'Ê'],
-['E', 'Ê'],
-['E', 'Ê'],
-['e', 'ê'],
-['e', 'ê'],
-['e', 'ê'],
-['e', 'ê'],
-['e', 'ê'],
-['e', 'ê'],
-['O', 'Ô'],
-['O', 'Ô'],
-['O', 'Ô'],
-['O', 'Ô'],
-['O', 'Ô'],
-['O', 'Ô'],
-['o', 'ô'],
-['o', 'ô'],
-['o', 'ô'],
-['o', 'ô'],
-['o', 'ô'],
-['o', 'ô']],
-[['O', 'Ơ'],
-['O', 'Ơ'],
-['O', 'Ơ'],
-['O', 'Ơ'],
-['O', 'Ơ'],
-['O', 'Ơ'],
-['o', 'ơ'],
-['o', 'ơ'],
-['o', 'ơ'],
-['o', 'ơ'],
-['o', 'ơ'],
-['o', 'ơ'],
-['U', 'Ư'],
-['U', 'Ư'],
-['U', 'Ư'],
-['U', 'Ư'],
-['U', 'Ư'],
-['U', 'Ư'],
-['u', 'ư'],
-['u', 'ư'],
-['u', 'ư'],
-['u', 'ư'],
-['u', 'ư'],
-['u', 'ư']],
-[['A', 'Ă'],
-['A', 'Ă'],
-['A', 'Ă'],
-['A', 'Ă'],
-['A', 'Ă'],
-['A', 'Ă'],
-['a', 'ă'],
-['a', 'ă'],
-['a', 'ă'],
-['a', 'ă'],
-['a', 'ă'],
-['a', 'ă']],
+let restore_vowels = [[['A', 'Â'], ['a', 'â'], ['E', 'Ê'], ['e', 'ê'], ['O', 'Ô'], ['o', 'ô']],
+[['O', 'Ơ'], ['o', 'ơ'], ['U', 'Ư'], ['u', 'ư']],
+[['A', 'Ă'], ['a', 'ă']],
 [['D', 'Đ'], ['d', 'đ']]]
 
-let fix_vowel = [('ơă', 'oă'), ('ưă', 'ưa'),
-('ưư', 'ưu'), ('ươư', 'ươu')]
+
+// console.log('\u01B0');
+
+var fix_vowel = [['ơă', 'oă'], ['ưă', 'ưa'],
+['ưư', 'ưu'], ['ươư', 'ươu']]
 
 
 function str_multi_replace(s, replaces) {
@@ -805,6 +739,27 @@ function nn_norm(x, weight, bias, mean, variant) {
   return x
 }
 
+function hstack(list_of_2d_arrays) {
+  n = list_of_2d_arrays.length
+  return list_of_2d_arrays[0].map((v, i) => {
+    value = [v]
+    for (let index = 1; index < n; index++) {
+      value.push(list_of_2d_arrays[index][i])
+    }
+    return value
+  })
+}
+
+// s = hstack([[[1, 2, 3]], [[1, 2, 3]], [[1, 2, 3]], [[1, 2, 3, 5]]])
+
+// console.log(s.map((v) => v.flat()));
+
+
+
+
+
+
+
 
 function sumArray(x) {
   return x.reduce((partialSum, a) => partialSum + a, 0)
@@ -841,17 +796,109 @@ function multiplyMatrices(x, y) {
 
 
 
-// var model = require("model.json");
 var model = null
 
-fetch('model.json')
-  .then((response) => response.json())
-  .then((json) => { console.log(json.length); model = json });
+var MODEL_PATHS = ['./model.json', './model_rnn.json', './model_rnn_simple.json']
+
+function loadModel(modelIndex = 1, funcAfterLoaded = undefined) {
+  fetch(MODEL_PATHS[modelIndex])
+    .then((response) => response.json())
+    .then((json) => {
+      console.log('finished loading model', json.length); model = json; message("loaded model " + modelIndex);
+      if (funcAfterLoaded != undefined) {
+        funcAfterLoaded()
+      }
+    });
+}
+
+
+function message(s) {
+  document.querySelector("#message").innerText = s
+}
 
 
 // x = [[0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]]
+// i = model[0]
+// console.log(i[1][2],i[1][3]);
+
+// addArray(i[1][2], i[1][3])
 
 
+function nn_rnn_seq_3_word(x, weightX, weightH, biasX, biasH) {
+  bias = addArray(biasX, biasH)
+  h1 = multiplyMatrices(getColumn(x, 0), transpose(weightX))
+  h1 = matrixAddArray(h1, bias)
+  h1 = nn_relu(h1)
+  h2 = multiplyMatrices(getColumn(x, 1), transpose(weightX))
+  h2 = addMatix(h2, multiplyMatrices(h1, transpose(weightH)))
+  h2 = matrixAddArray(h2, bias)
+  h2 = nn_relu(h2)
+  h3 = multiplyMatrices(getColumn(x, 2), transpose(weightX))
+  h3 = addMatix(h3, multiplyMatrices(h2, transpose(weightH)))
+  h3 = matrixAddArray(h3, bias)
+  h3 = nn_relu(h3)
+  return hstack([h1, h2, h3])
+}
+
+
+// function flat_dim_1(){
+//   return 
+// }
+
+
+function nn_rnnx1(xo, weightX, weightH, biasX, biasH) {
+  x = xo.map((v) => [v.slice(0, 15), v.slice(15, 30), v.slice(30, 45)])
+  x = nn_rnn_seq_3_word(x, weightX, weightH, biasX, biasH)
+  // x = residual_flat(x, xo)
+  x = x.map((v, i) => {
+    v = v.flat()
+    return [...v, ...xo[i]]
+  })
+  return x
+}
+
+
+function nn_rnnx2(xo, weightX, weightH, biasX, biasH, weight2X, weight2H, bias2X, bias2H) {
+
+  x = xo.map((v) => [v.slice(0, 15), v.slice(15, 30), v.slice(30, 45)])
+  x = nn_rnn_seq_3_word(x, weightX, weightH, biasX, biasH)
+  x = nn_rnn_seq_3_word(x, weight2X, weight2H, bias2X, bias2H)
+  // x = residual_flat(x, xo)
+
+  x = x.map((v, i) => {
+    v = v.flat()
+    return [...v, ...xo[i]]
+  })
+  return x
+}
+
+
+
+// xo = x
+// x = x.map((v) => [v.slice(0, 15), v.slice(15, 30), v.slice(30, 45)])
+// x = nn_rnn_seq_3_word(x, ...i[1])
+// x = nn_rnn_seq_3_word(x, ...i[1])
+// x = residual_flat(x, xo)
+
+// weightX = i[1][0]
+// weightH = i[1][1]
+// biasX = i[1][2]
+// biasH = i[1][3]
+
+// console.log(biasX);
+
+// console.log(x.length);
+// console.log(x[0].length);
+// x = nn_rnnx1(x, ...model[0][1])
+// console.log(x.length);
+// console.log(x[0].length);
+// x = nn_linear(x, ...model[1][1])
+// x = nn_norm(x, ...model[2][1].slice(0, 4))
+// x = nn_relu(x)
+// x = nn_linear(x, ...model[4][1])
+// console.log(x);
+
+// x[0].slice()
 // console.log(model[0][0]);
 // for 
 // weight = model[0][1][0]
@@ -872,6 +919,8 @@ function applyLayer(x, layerData) {
   if (i[0] == 'linear') x = nn_linear(x, ...i[1])
   else if (i[0] == 'norm') x = nn_norm(x, ...(i[1].slice(0, 4)))
   else if (i[0] == 'relu') x = nn_relu(x)
+  else if (i[0] == 'rnnx1') x = nn_rnnx1(x, ...i[1])
+  else if (i[0] == 'rnnx2') x = nn_rnnx2(x, ...i[1])
   return x
 }
 
@@ -905,5 +954,14 @@ function predict(x) {
   return y
 }
 
-// s = them_dau_with_model('vi sao anh khong den ben toi')
+
+
+// s = them_dau_with_model('vi sao anh mai khong den voi em')
 // console.log(s);
+
+
+
+
+window.onload = function () { loadModel() };
+
+// document.addEventListener("load", function () { loadModel() });
