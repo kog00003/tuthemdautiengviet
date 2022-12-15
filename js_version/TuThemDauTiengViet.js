@@ -814,7 +814,8 @@ function loadModel(modelIndex = 1, funcAfterLoaded = undefined) {
 
 
 function message(s) {
-  document.querySelector("#message").innerText = s
+  if (document.querySelector("#message") != undefined)
+    document.querySelector("#message").innerText = s
 }
 
 
