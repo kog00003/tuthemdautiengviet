@@ -9,6 +9,8 @@ convert all python to javascript, don't use any library, pure js
 
 linear done
 
-remaining: rnn..
+rnn done
+
+remaining: optimizing...
 
 
