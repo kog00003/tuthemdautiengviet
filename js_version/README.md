@@ -11,6 +11,6 @@ linear done
 
 rnn done
 
-remaining: optimizing...
+
 
 
