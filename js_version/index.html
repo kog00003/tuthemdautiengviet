@@ -1,18 +1,36 @@
 <head></head>
 <script src="TuThemDauTiengViet.js"></script>
 
-<body>
+<body style="text-align: center;">
   <script>
-    function onKeyPressListener(event) {
+
+    function reloadModel() {
+      modelIndex = parseInt(document.querySelector("#select-model").value)
+      loadModel(modelIndex, function () { autoThemDau() })
+      // autoThemDau()
+    }
+
+    function autoThemDau() {
       text = document.querySelector("#input").value
+      document.querySelector("#input").value = them_dau_with_model(bodau(text))
+    }
+
+    function onKeyPressListener(event) {
       if ([' ', '. ', ', '].includes(event.key)) {
         // console.log();
-        document.querySelector("#input").value = them_dau_with_model(bodau(text))
+        autoThemDau()
       }
       // console.log(event);
     }
   </script>
+  <select id="select-model" onchange="reloadModel()">
+    <option value="0">model linear150k</option>
+    <option value="1" selected="true">model rnn150k</option>
+    <option value="2">model rnn75k</option>
+  </select>
 
+  <div id="message"></div>
   <input id="input" style="font-size: 24px;padding: 16px;width: 100%;" onkeypress="onKeyPressListener(event)"
     placeholder="type something">
+
 </body>
