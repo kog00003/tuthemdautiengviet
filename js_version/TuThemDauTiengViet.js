@@ -963,6 +963,4 @@ function predict(x) {
 
 
 
-window.onload = function () { loadModel() };
-
-// document.addEventListener("load", function () { loadModel() });
+// window.onload = function () { loadModel() };
