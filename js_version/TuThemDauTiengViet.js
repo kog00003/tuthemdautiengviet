@@ -798,7 +798,7 @@ function multiplyMatrices(x, y) {
 
 var model = null
 
-var MODEL_PATHS = ['./model.json', './model_rnn.json', './model_rnn_simple.json']
+var MODEL_PATHS = ['model.json', 'model_rnn.json', 'model_rnn_simple.json']
 
 function loadModel(modelIndex = 1, funcAfterLoaded = undefined) {
   fetch(MODEL_PATHS[modelIndex])
