@@ -964,4 +964,7 @@ function predict(x) {
 
 
 
-// window.onload = function () { loadModel() };
+
+
+loadModel() 
+// window.addEventListener("load", function () { loadModel() });
