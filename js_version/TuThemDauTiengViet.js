@@ -801,6 +801,7 @@ var model = null
 var MODEL_PATHS = ['model.json', 'model_rnn.json', 'model_rnn_simple.json']
 
 function loadModel(modelIndex = 1, funcAfterLoaded = undefined) {
+  message("loading model " + modelIndex + " ... ");
   fetch(MODEL_PATHS[modelIndex])
     .then((response) => response.json())
     .then((json) => {
