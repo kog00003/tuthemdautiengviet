@@ -1,6 +1,8 @@
 # tuthemdautiengviet
 
-<h1>building model tự thêm dấu cho tiếng việt</h1>
+<h1>building model predit accent for vietnamese word
+
+tự thêm dấu cho tiếng việt</h1>
 
 on progressing...
 
@@ -11,6 +13,8 @@ https://htmlpreview.github.io/?https://github.com/kog00003/tuthemdautiengviet/bl
 <h3>data in:</h3>
 
 không dùng cả câu chỉ dùng 3 chữ (chữ trước, chữ hiện tãi(cần thêm dấu), chữ tiếp theo)
+
+use only 3 words(prev,curr(need predict accent),next)
 
 <h3>encode chữ: </h3>
 
